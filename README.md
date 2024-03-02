@@ -1,5 +1,9 @@
 # Xray Classification
 
+### Setup AWS CLI
+```bash
+bash init_setup.sh
+```
 ### Project Workflows
 - constants
 - config_entity
