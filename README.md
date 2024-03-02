@@ -1,4 +1,4 @@
-# Hate Speech Detection
+# Xray Classification
 
 ### Project Workflows
 - constants
