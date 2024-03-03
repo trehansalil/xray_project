@@ -12,7 +12,7 @@ from keras.utils import pad_sequences
 from xray.configuration.gcloud_syncer import GCloudSync
 from xray.components.data_transformation import DataTransformation
 from xray.entity.config_entity import DataTransformationConfig
-from xray.entity.artifact_entity import DataIngestionArtifacts
+from xray.entity.artifact_entity import DataIngestionArtifact
 
 
 class PredictionPipeline:
@@ -22,7 +22,7 @@ class PredictionPipeline:
         self.model_path = os.path.join("artifacts", "PredictModel")
         self.gcloud = GCloudSync()
         self.data_transformation = DataTransformation(data_transformation_config= DataTransformationConfig,
-                                                      data_ingestion_artifacts=DataIngestionArtifacts)
+                                                      data_ingestion_artifacts=DataIngestionArtifact)
 
 
     

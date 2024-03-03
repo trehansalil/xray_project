@@ -8,7 +8,7 @@ import inspect
 from xray.logger import logging
 from xray.exception import CustomException
 from xray.entity.config_entity import ModelEvaluationConfig
-from xray.entity.artifact_entity import ModelTrainerArtifacts, ModelEvaluationArtifacts, DataTransformationArtifacts
+from xray.entity.artifact_entity import ModelTrainerArtifact, ModelEvaluationArtifact, DataTransformationArtifact
 from keras.preprocessing.text import Tokenizer
 import tensorflow as tf
 from keras.utils import pad_sequences
@@ -20,8 +20,8 @@ from sklearn.metrics import confusion_matrix
 class ModelEvaluation:
     def __init__(self, 
                  model_evaluation_config: ModelEvaluationConfig, 
-                 model_trainer_artifacts: ModelTrainerArtifacts,
-                 data_transformation_artifacts: DataTransformationArtifacts):
+                 model_trainer_artifacts: ModelTrainerArtifact,
+                 data_transformation_artifacts: DataTransformationArtifact):
         
         """
         :param model_evaluation_config: Configuration for model evaluation            
@@ -113,7 +113,7 @@ class ModelEvaluation:
         
 
     
-    def initiate_model_evaluation(self) -> ModelEvaluationArtifacts:
+    def initiate_model_evaluation(self) -> ModelEvaluationArtifact:
         """
             Method Name :   initiate_model_evaluation
             Description :   This function is used to initiate all steps of the model evaluation
@@ -153,7 +153,7 @@ class ModelEvaluation:
                     is_model_accepted = False
                     logging.info("Trained model accepted")
 
-            model_evaluation_artifacts = ModelEvaluationArtifacts(is_model_accepted=is_model_accepted)
+            model_evaluation_artifacts = ModelEvaluationArtifact(is_model_accepted=is_model_accepted)
             
             logging.info("Returning the ModelEvaluationArtifacts")
             logging.info(f"Exited the {current_function_name} method of {self.__class__.__name__} class")       

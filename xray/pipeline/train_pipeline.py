@@ -13,12 +13,12 @@ from xray.entity.config_entity import (DataIngestionConfig,
                                        ModelTrainerConfig, 
                                        ModelEvaluationConfig, 
                                        ModelPusherConfig)
-from xray.entity.artifact_entity import (DataIngestionArtifacts, 
-                                         DataValidationArtifacts, 
-                                         DataTransformationArtifacts, 
-                                         ModelTrainerArtifacts,
-                                         ModelEvaluationArtifacts, 
-                                         ModelPusherArtifacts)
+from xray.entity.artifact_entity import (DataIngestionArtifact, 
+                                         DataValidationArtifact, 
+                                         DataTransformationArtifact, 
+                                         ModelTrainerArtifact,
+                                         ModelEvaluationArtifact, 
+                                         ModelPusherArtifact)
 from xray.components.model_trainer import ModelTrainer
 
 class TrainingPipeline:
@@ -30,7 +30,7 @@ class TrainingPipeline:
         self.model_evaluation_config = ModelEvaluationConfig()
         self.model_pusher_config = ModelPusherConfig()
         
-    def start_data_ingestion(self) -> DataIngestionArtifacts:
+    def start_data_ingestion(self) -> DataIngestionArtifact:
         current_function_name = inspect.stack()[0][3]
         try:
             logging.info(f"Getting the data from GCloud Storage bucket using the {current_function_name} method of {self.__class__.__name__} class")
@@ -44,7 +44,7 @@ class TrainingPipeline:
         except Exception as e:
             raise CustomException(e, sys) from e   
     
-    def start_data_validation(self) -> DataValidationArtifacts:
+    def start_data_validation(self) -> DataValidationArtifact:
         current_function_name = inspect.stack()[0][3]
         try:
             logging.info(f"Starting Validation of data using the {current_function_name} method of {self.__class__.__name__} class")
@@ -55,7 +55,7 @@ class TrainingPipeline:
         except Exception as e:
             raise CustomException(e, sys) from e       
         
-    def start_data_transformation(self, data_ingestion_artifacts: DataIngestionArtifacts, data_validation_artifacts: DataValidationArtifacts) -> DataTransformationArtifacts:
+    def start_data_transformation(self, data_ingestion_artifacts: DataIngestionArtifact, data_validation_artifacts: DataValidationArtifact) -> DataTransformationArtifact:
         current_function_name = inspect.stack()[0][3]
         try:
             logging.info(f"Starting Transformation of data using the {current_function_name} method of {self.__class__.__name__} class")
@@ -71,7 +71,7 @@ class TrainingPipeline:
         except Exception as e:
             raise CustomException(e, sys) from e    
 
-    def start_model_trainer(self, data_transformation_artifacts: DataTransformationArtifacts) -> ModelTrainerArtifacts:
+    def start_model_trainer(self, data_transformation_artifacts: DataTransformationArtifact) -> ModelTrainerArtifact:
         current_function_name = inspect.stack()[0][3]
         try:
             logging.info(f"Starting Model Training using the {current_function_name} method of {self.__class__.__name__} class")
@@ -87,7 +87,7 @@ class TrainingPipeline:
         except Exception as e:
             raise CustomException(e, sys) from e                    
         
-    def start_model_evaluation(self, model_trainer_artifacts: ModelTrainerArtifacts, data_transformation_artifacts: DataTransformationArtifacts) -> ModelEvaluationArtifacts:
+    def start_model_evaluation(self, model_trainer_artifacts: ModelTrainerArtifact, data_transformation_artifacts: DataTransformationArtifact) -> ModelEvaluationArtifact:
         
         current_function_name = inspect.stack()[0][3]
         logging.info(f"Starting Model Evaluation using the {current_function_name} method of {self.__class__.__name__} class")
@@ -106,7 +106,7 @@ class TrainingPipeline:
         
     
 
-    def start_model_pusher(self,) -> ModelPusherArtifacts:
+    def start_model_pusher(self,) -> ModelPusherArtifact:
         current_function_name = inspect.stack()[0][3]
         logging.info(f"Starting Model Evaluation using the {current_function_name} method of {self.__class__.__name__} class")
         try:

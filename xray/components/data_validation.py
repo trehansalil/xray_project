@@ -5,7 +5,7 @@ import pandas as pd
 from xray.logger import logging
 from xray.exception import CustomException
 from xray.entity.config_entity import DataValidationConfig
-from xray.entity.artifact_entity import DataValidationArtifacts
+from xray.entity.artifact_entity import DataValidationArtifact
 
 
 class DataValidation:
@@ -57,7 +57,7 @@ class DataValidation:
         except Exception as e:
             raise CustomException(e, sys) from e
     
-    def initiate_data_validation(self) -> DataValidationArtifacts:
+    def initiate_data_validation(self) -> DataValidationArtifact:
         current_function_name = inspect.stack()[0][3]
         logging.info(f"Entered the {current_function_name} method of {self.__class__.__name__} class")
         
@@ -65,7 +65,7 @@ class DataValidation:
             imbalance_data_valid, raw_data_valid = self.validate_data()
             logging.info(f"Unzipped file & split into train and validation set using {current_function_name} method of {self.__class__.__name__} class")
                         
-            data_validation_artifacts = DataValidationArtifacts(
+            data_validation_artifacts = DataValidationArtifact(
                 imbalance_data_valid = imbalance_data_valid, 
                 raw_data_valid = raw_data_valid
             )

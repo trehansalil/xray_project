@@ -4,7 +4,7 @@ from xray.logger import logging
 from xray.exception import CustomException
 from xray.configuration.gcloud_syncer import GCloudSync
 from xray.entity.config_entity import ModelPusherConfig
-from xray.entity.artifact_entity import ModelPusherArtifacts
+from xray.entity.artifact_entity import ModelPusherArtifact
 
 class ModelPusher:
     def __init__(self, model_pusher_config: ModelPusherConfig):
@@ -16,7 +16,7 @@ class ModelPusher:
 
     
     
-    def initiate_model_pusher(self) -> ModelPusherArtifacts:
+    def initiate_model_pusher(self) -> ModelPusherArtifact:
         """
             Method Name :   initiate_model_pusher
             Description :   This method initiates model pusher.
@@ -36,7 +36,7 @@ class ModelPusher:
             logging.info("Uploaded best model to gcloud storage")
 
             # Saving the model pusher artifacts
-            model_pusher_artifact = ModelPusherArtifacts(
+            model_pusher_artifact = ModelPusherArtifact(
                 bucket_name=self.model_pusher_config.BUCKET_NAME
             )
             logging.info(f"Exited the {current_function_name} method of {self.__class__.__name__} class")

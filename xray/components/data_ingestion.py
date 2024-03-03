@@ -6,7 +6,7 @@ from xray.logger import logging
 from xray.exception import CustomException
 from xray.configuration.cloud_storage import S3Operation
 from xray.entity.config_entity import DataIngestionConfig
-from xray.entity.artifact_entity import DataIngestionArtifacts
+from xray.entity.artifact_entity import DataIngestionArtifact
 
 
 class DataIngestion:
@@ -29,27 +29,14 @@ class DataIngestion:
         except Exception as e:
             raise CustomException(e, sys) from e
 
-    def unzip_and_clean(self):
-        current_function_name = inspect.stack()[0][3]
-        logging.info(f"Entered the {current_function_name} method of {self.__class__.__name__} class")
-        try:
-            with ZipFile(self.data_ingestion_config.ZIP_FILE_PATH) as zip_ref:
-                zip_ref.extractall(self.data_ingestion_config.ZIP_FILE_DIR)
-            
-            logging.info(f"Exited the {current_function_name} method of {self.__class__.__name__} class")
-            
-            return self.data_ingestion_config.DATA_ARTIFACTS_DIR, self.data_ingestion_config.NEW_DATA_ARTIFACTS_DIR
-        except Exception as e:
-            raise CustomException(e, sys) from e
-
-    def initiate_data_ingestion(self) -> DataIngestionArtifacts:
+    def initiate_data_ingestion(self) -> DataIngestionArtifact:
         current_function_name = inspect.stack()[0][3]
         logging.info(f"Entered the {current_function_name} method of {self.__class__.__name__} class")
 
         try:
             self.get_data_from_s3()
 
-            data_ingestion_artifact: DataIngestionArtifacts = DataIngestionArtifacts(
+            data_ingestion_artifact: DataIngestionArtifact = DataIngestionArtifact(
                 train_file_path=self.data_ingestion_config.train_data_path,
                 test_file_path=self.data_ingestion_config.test_data_path,
             )

@@ -11,7 +11,7 @@ nltk.download('stopwords')
 from xray.logger import logging
 from xray.exception import CustomException
 from xray.entity.config_entity import DataTransformationConfig, ModelTrainerConfig
-from xray.entity.artifact_entity import DataTransformationArtifacts, DataIngestionArtifacts, DataValidationArtifacts, ModelTrainerArtifacts
+from xray.entity.artifact_entity import DataTransformationArtifact, DataIngestionArtifact, DataValidationArtifact, ModelTrainerArtifact
 from keras.preprocessing.text import Tokenizer
 import tensorflow as tf
 from keras.utils import pad_sequences
@@ -20,7 +20,7 @@ from xray.constants import *
 
 class ModelTrainer:
     def __init__(self, model_trainer_config: ModelTrainerConfig, 
-                 data_transformation_artifacts: DataTransformationArtifacts):
+                 data_transformation_artifacts: DataTransformationArtifact):
         self.model_trainer_config = model_trainer_config
         self.data_transformation_artifacts = data_transformation_artifacts
         
@@ -61,7 +61,7 @@ class ModelTrainer:
         except Exception as e:
             raise CustomException(e, sys) from e  
     
-    def initiate_model_trainer(self,) -> ModelTrainerArtifacts:
+    def initiate_model_trainer(self,) -> ModelTrainerArtifact:
         current_function_name = inspect.stack()[0][3]
         logging.info(f"Entered the {current_function_name} method of {self.__class__.__name__} class")
         
@@ -110,7 +110,7 @@ class ModelTrainer:
 
             x_train.to_csv(self.model_trainer_config.X_TRAIN_DATA_PATH)
 
-            model_trainer_artifacts = ModelTrainerArtifacts(
+            model_trainer_artifacts = ModelTrainerArtifact(
                 trained_model_path = self.model_trainer_config.TRAINED_MODEL_PATH,
                 x_test_path = self.model_trainer_config.X_TEST_DATA_PATH,
                 y_test_path = self.model_trainer_config.Y_TEST_DATA_PATH)
