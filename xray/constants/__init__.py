@@ -67,6 +67,9 @@ EPOCH = 2
 BENTOML_MODEL_NAME: str = "xray_model"
 BENTOML_SERVICE_NAME: str = "xray_service"
 BENTOML_ECR_URI: str = "xray_bento_image"
+BENTOML_ECR_REGION: str = "us-east-1"
+BENTOML_ECR_LINK: str = f"136566696263.dkr.ecr.{BENTOML_ECR_REGION}.amazonaws.com"
+BENTOML_ECR_USERNAME: str = "AWS"
 PREDICTION_LABEL: dict = {"0": CLASS_LABEL_1, 1: CLASS_LABEL_2}
 
 # Model Arhcitecture constants
