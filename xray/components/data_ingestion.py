@@ -19,9 +19,9 @@ class DataIngestion:
         logging.info(f"Entered the {current_function_name} method of {self.__class__.__name__} class")        
         try:
             self.s3.sync_folder_from_s3(
-                folder=self.data_ingestion_config.data_path,
-                bucket_name=self.data_ingestion_config.bucket_name,
-                bucket_folder_name=self.data_ingestion_config.s3_data_folder,
+                folder=self.data_ingestion_config.DATA_INGESTION_ARTIFACTS_DIR,
+                bucket_name=self.data_ingestion_config.BUCKET_NAME,
+                bucket_folder_name=self.data_ingestion_config.S3_DATA_FOLDER,
             )
 
             logging.info(f"Exited the {current_function_name} method of {self.__class__.__name__} class")
@@ -37,8 +37,8 @@ class DataIngestion:
             self.get_data_from_s3()
 
             data_ingestion_artifact: DataIngestionArtifact = DataIngestionArtifact(
-                train_file_path=self.data_ingestion_config.train_data_path,
-                test_file_path=self.data_ingestion_config.test_data_path,
+                train_file_path=self.data_ingestion_config.TRAIN_DATA_ARTIFACTS_DIR,
+                test_file_path=self.data_ingestion_config.TEST_DATA_ARTIFACTS_DIR,
             )
 
             logging.info(f"Exited the {current_function_name} method of {self.__class__.__name__} class")

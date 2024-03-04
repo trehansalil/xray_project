@@ -63,7 +63,6 @@ EPOCH: int = 1
 LEARNING_RATE = 0.01
 MOMENTUM_BETA = 0.8
 RANDOM_STATE = 42
-EPOCH = 2
 BENTOML_MODEL_NAME: str = "xray_model"
 BENTOML_SERVICE_NAME: str = "xray_service"
 BENTOML_ECR_URI: str = "xray_bento_image"
@@ -72,19 +71,19 @@ BENTOML_ECR_LINK: str = f"430247671429.dkr.ecr.{BENTOML_ECR_REGION}.amazonaws.co
 BENTOML_ECR_USERNAME: str = "AWS"
 PREDICTION_LABEL: dict = {"0": CLASS_LABEL_1, 1: CLASS_LABEL_2}
 
-# Model Arhcitecture constants
-MAX_WORDS = 5000
-MAX_LEN = 300
-LOSS = 'binary_crossentropy'
-METRICS = ['accuracy']
-ACTIVATION = 'sigmoid'
+# # Model Arhcitecture constants
+# MAX_WORDS = 5000
+# MAX_LEN = 300
+# LOSS = 'binary_crossentropy'
+# METRICS = ['accuracy']
+# ACTIVATION = 'sigmoid'
 
-# Model Evaluation constants
-MODEL_EVALUATION_ARTIFACTS_DIR = "ModelEvaluationArtifacts"
-BEST_MODEL_DIR = "best_Model"
-MODEL_EVALUATION_FILE_NAME = 'loss.csv'
+# # Model Evaluation constants
+# MODEL_EVALUATION_ARTIFACTS_DIR = "ModelEvaluationArtifacts"
+# BEST_MODEL_DIR = "best_Model"
+# MODEL_EVALUATION_FILE_NAME = 'loss.csv'
 
 
-MODEL_NAME = 'model.h5'
-APP_HOST = '0.0.0.0'
-APP_PORT = 8080
+# MODEL_NAME = 'model.h5'
+# APP_HOST = '0.0.0.0'
+# APP_PORT = 8080

@@ -183,7 +183,7 @@ class ModelTrainer:
 
                 self.test()
 
-            os.makedirs(self.model_trainer_config.ARTIFACTS_DIR, exist_ok=True)
+            os.makedirs(self.model_trainer_config.TRAINED_MODEL_DIR, exist_ok=True)
 
             torch.save(model, self.model_trainer_config.TRAINED_MODEL_PATH)
 
