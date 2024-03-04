@@ -22,7 +22,8 @@ class DataIngestionConfig:
         
 @dataclass        
 class DataTransformationConfig:
-    def __init__(self):        
+    def __init__(self):    
+        self.ARTIFACTS_DIR = ARTIFACTS_DIR
         self.DATA_TRANSFORMATION_ARTIFACTS_DIR: str = os.path.join(os.getcwd(), ARTIFACTS_DIR, DATA_TRANSFORMATION_ARTIFACTS_DIR)
         self.TRAIN_TRANSFORMS_FILE: str = os.path.join(
             self.DATA_TRANSFORMATION_ARTIFACTS_DIR, TRAIN_TRANSFORMS_FILE
@@ -54,8 +55,10 @@ class DataTransformationConfig:
         
 @dataclass        
 class ModelTrainerConfig:
-    def __init__(self):        
+    def __init__(self):    
+        self.ARTIFACTS_DIR = ARTIFACTS_DIR    
         self.TRAINED_MODEL_DIR: str = os.path.join(os.getcwd(), ARTIFACTS_DIR, MODEL_TRAINER_ARTIFACTS_DIR)
+        self.TRAINED_BENTOML_MODEL_NAME = BENTOML_MODEL_NAME
         self.TRAINED_MODEL_PATH = os.path.join(self.TRAINED_MODEL_DIR, TRAINED_MODEL_NAME)  
 
         self.TRAIN_TRANSFORMS_KEY: str = TRAIN_TRANSFORMS_KEY
@@ -71,6 +74,7 @@ class ModelTrainerConfig:
 @dataclass
 class ModelEvaluationConfig: 
     def __init__(self):
+        self.ARTIFACTS_DIR = ARTIFACTS_DIR
         self.DEVICE: device = DEVICE
         self.TEST_LOSS: int = 0
         self.TEST_ACCURACY: int = 0
