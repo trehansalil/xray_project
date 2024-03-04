@@ -24,7 +24,7 @@ class ModelPusher:
             logging.info("Creating docker image for bento")
 
             os.system(
-                f"bentoml containerize {self.model_pusher_config.BENTOML_SERVICE_NAME}:latest -t {self.model_pusher_config.BENTOML_ECR_LINK}/{self.model_pusher_config.bentoml_ecr_image}:latest"
+                f"bentoml containerize {self.model_pusher_config.BENTOML_SERVICE_NAME}:latest -t {self.model_pusher_config.BENTOML_ECR_LINK}/{self.model_pusher_config.BENTOML_ECR_URI}:latest"
             )
 
             logging.info("Created docker image for bento")
@@ -66,8 +66,8 @@ class ModelPusher:
             self.build_and_push_bento_image()
 
             model_pusher_artifact = ModelPusherArtifact(
-                bentoml_model_name=self.model_pusher_config.bentoml_model_name,
-                bentoml_service_name=self.model_pusher_config.bentoml_service_name,
+                bentoml_model_name=self.model_pusher_config.BENTOML_MODEL_NAME,
+                bentoml_service_name=self.model_pusher_config.BENTOML_SERVICE_NAME,
             )
 
             logging.info(f"Exited the {current_function_name} method of {self.__class__.__name__} class")
