@@ -1,29 +1,33 @@
 from dataclasses import dataclass
+from torch.utils.data.dataloader import DataLoader
 
 @dataclass
-class DataIngestionArtifacts:
-    imbalance_data_file_path: str
-    raw_data_file_path: str
+class DataIngestionArtifact:
+    train_file_path: str
+    test_file_path: str
 
-@dataclass    
-class DataValidationArtifacts:    
-    imbalance_data_valid: bool
-    raw_data_valid: bool
+# @dataclass    
+# class DataValidationArtifact:    
+#     imbalance_data_valid: bool
+#     raw_data_valid: bool
     
 @dataclass    
-class DataTransformationArtifacts:    
-    transformation_data_file_path: str  
+class DataTransformationArtifact:    
+    transformed_train_object: DataLoader
+    transformed_test_object: DataLoader
+
+    train_transform_file_path: str
+    test_transform_file_path: str  
     
 @dataclass    
-class ModelTrainerArtifacts:    
+class ModelTrainerArtifact:    
     trained_model_path: str
-    x_test_path: list
-    y_test_path: list 
     
 @dataclass
-class ModelEvaluationArtifacts:
-    is_model_accepted: bool 
+class ModelEvaluationArtifact:
+    model_accuracy: float
 
 @dataclass
-class ModelPusherArtifacts:
-    bucket_name: str    
+class ModelPusherArtifact:
+    bentoml_model_name: str
+    bentoml_service_name: str 

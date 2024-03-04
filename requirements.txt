@@ -4,4 +4,5 @@ torchvision
 joblib
 tdqm
 wincertstore
+from-root
 -e .

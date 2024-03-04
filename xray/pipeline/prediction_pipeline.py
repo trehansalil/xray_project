@@ -8,11 +8,10 @@ from PIL import Image
 from xray.logger import logging
 from xray.constants import *
 from xray.exception import CustomException
-from keras.utils import pad_sequences
-from xray.configuration.gcloud_syncer import GCloudSync
+from xray.configuration.cloud_storage import S3Operation
 from xray.components.data_transformation import DataTransformation
 from xray.entity.config_entity import DataTransformationConfig
-from xray.entity.artifact_entity import DataIngestionArtifacts
+from xray.entity.artifact_entity import DataIngestionArtifact
 
 
 class PredictionPipeline:
@@ -20,9 +19,9 @@ class PredictionPipeline:
         self.bucket_name = BUCKET_NAME
         self.model_name = MODEL_NAME
         self.model_path = os.path.join("artifacts", "PredictModel")
-        self.gcloud = GCloudSync()
+        self.aws_cloud = S3Operation()
         self.data_transformation = DataTransformation(data_transformation_config= DataTransformationConfig,
-                                                      data_ingestion_artifacts=DataIngestionArtifacts)
+                                                      data_ingestion_artifacts=DataIngestionArtifact)
 
 
     
@@ -37,7 +36,7 @@ class PredictionPipeline:
         try:
             # Loading the best model from s3 bucket
             os.makedirs(self.model_path, exist_ok=True)
-            self.gcloud.sync_folder_from_gcloud(self.bucket_name, self.model_name, self.model_path)
+            self.aws_cloud.sync_folder_from_s3(self.bucket_name, self.model_name, self.model_path)
             best_model_path = os.path.join(self.model_path, self.model_name)
             logging.info(f"Exited the {current_function_name} method of {self.__class__.__name__} class")
             return best_model_path

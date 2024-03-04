@@ -1,121 +1,211 @@
 import os
-import pickle
 import sys
+
+import bentoml
+import joblib
 import inspect
-import pandas as pd
-import nltk
-import inspect
-from nltk.corpus import stopwords
-from sklearn.model_selection import train_test_split
-nltk.download('stopwords')
-from xray.logger import logging
-from xray.exception import CustomException
-from xray.entity.config_entity import DataTransformationConfig, ModelTrainerConfig
-from xray.entity.artifact_entity import DataTransformationArtifacts, DataIngestionArtifacts, DataValidationArtifacts, ModelTrainerArtifacts
-from keras.preprocessing.text import Tokenizer
-import tensorflow as tf
-from keras.utils import pad_sequences
-from xray.ml.model import ModelArchitecture
+import torch.nn.functional as F
+from torch.nn import Module
+from torch.optim import Optimizer
+from torch.optim.lr_scheduler import StepLR, _LRScheduler
+from tqdm import tqdm
+
 from xray.constants import *
+from xray.entity.artifact_entity import (
+    DataTransformationArtifact,
+    ModelTrainerArtifact,
+)
+from xray.entity.config_entity import ModelTrainerConfig
+from xray.exception import CustomException
+from xray.logger import logging
+from xray.ml.model import Net
 
 class ModelTrainer:
     def __init__(self, model_trainer_config: ModelTrainerConfig, 
-                 data_transformation_artifacts: DataTransformationArtifacts):
-        self.model_trainer_config = model_trainer_config
-        self.data_transformation_artifacts = data_transformation_artifacts
-        
-    def splitting_data(self, csv_path):
-        current_function_name = inspect.stack()[0][3]
-        logging.info(f"Entered the {current_function_name} method of {self.__class__.__name__} class")
-        try:        
-            df = pd.read_csv(csv_path, index_col=False)
-            logging.info("Splitting the data into x & y")
-            x = df[TWEET].astype(str)
-            y = df[LABEL]
-            
-            logging.info("Applying the train_test_split on the data")
-            x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=RANDOM_STATE)
-            
-            logging.info(f"Exited the {current_function_name} method of {self.__class__.__name__} class")
-                        
-            return x_train, x_test, y_train, y_test
-        except Exception as e:
-            raise CustomException(e, sys) from e  
-    
-    def tokenizing_data(self, x_train):
-        current_function_name = inspect.stack()[0][3]
-        logging.info(f"Entered the {current_function_name} method of {self.__class__.__name__} class")
-        try:        
-            tokenizer = Tokenizer(num_words=self.model_trainer_config.MAX_WORDS)
-            logging.info("Applying Tokenization on data")
-            tokenizer.fit_on_texts(x_train)
-            sequences = tokenizer.texts_to_sequences(x_train)
-            
-            
-            logging.info(f"Converting text to sequences: {sequences}")
-            sequences_matrix = pad_sequences(sequences, maxlen=self.model_trainer_config.MAX_LEN)
-            logging.info(f"The sequence matrix is: {sequences_matrix}")
-            logging.info(f"Exited the {current_function_name} method of {self.__class__.__name__} class")
-                        
-            return sequences_matrix, tokenizer
-        except Exception as e:
-            raise CustomException(e, sys) from e  
-    
-    def initiate_model_trainer(self,) -> ModelTrainerArtifacts:
-        current_function_name = inspect.stack()[0][3]
-        logging.info(f"Entered the {current_function_name} method of {self.__class__.__name__} class")
-        
+                 data_transformation_artifact: DataTransformationArtifact):
+        self.model_trainer_config: ModelTrainerConfig = model_trainer_config
+        self.data_transformation_artifact: DataTransformationArtifact = data_transformation_artifact
+        self.model: Module = Net()
+
+    def train(self, optimizer: Optimizer) -> None:
         """
-        Method Name :   initiate_model_trainer
-        Description :   This function initiates a model trainer steps
-        
-        Output      :   Returns model trainer artifact
-        On Failure  :   Write an exception log and then raise an exception
+        Description: To train the model
+
+        input: model,device,train_loader,optimizer,epoch
+
+        output: loss, batch id and accuracy
         """
+        current_function_name = inspect.stack()[0][3]
+        logging.info(f"Entered the {current_function_name} method of {self.__class__.__name__} class")  
 
         try:
-            x_train,x_test,y_train,y_test = self.splitting_data(csv_path=self.data_transformation_artifacts.transformation_data_file_path)
-            model_architecture = ModelArchitecture()   
+            self.model.train()
 
-            model = model_architecture.get_model()
+            pbar = tqdm(self.data_transformation_artifact.transformed_train_object)
 
+            correct: int = 0
 
+            processed = 0
 
-            logging.info(f"Xtrain size is : {x_train.shape}")
+            for batch_idx, (data, target) in enumerate(pbar):
+                data, target = data.to(DEVICE), target.to(DEVICE)
 
-            logging.info(f"Xtest size is : {x_test.shape}")
+                # Initialization of gradient
+                optimizer.zero_grad()
 
-            sequences_matrix, tokenizer =self.tokenizing_data(x_train)
+                # In PyTorch, gradient is accumulated over backprop and even though thats used in RNN generally not used in CNN
+                # or specific requirements
+                ## prediction on data
 
+                y_pred = self.model(data)
 
-            logging.info("Entered into model training")
-            model.fit(sequences_matrix, y_train, 
-                        batch_size=self.model_trainer_config.BATCH_SIZE, 
-                        epochs = self.model_trainer_config.EPOCH, 
-                        validation_split=self.model_trainer_config.VALIDATION_SPLIT, 
-                        )
-            logging.info("Model training finished")
+                # Calculating loss given the prediction
+                loss = F.nll_loss(y_pred, target)
 
-            
-            with open('tokenizer.pickle', 'wb') as handle:
-                pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
-            os.makedirs(self.model_trainer_config.TRAINED_MODEL_DIR,exist_ok=True)
+                # Backprop
+                loss.backward()
 
+                optimizer.step()
 
+                # get the index of the log-probability corresponding to the max value
+                pred = y_pred.argmax(dim=1, keepdim=True)
 
-            logging.info("saving the model")
-            model.save(self.model_trainer_config.TRAINED_MODEL_PATH)
-            x_test.to_csv(self.model_trainer_config.X_TEST_DATA_PATH)
-            y_test.to_csv(self.model_trainer_config.Y_TEST_DATA_PATH)
+                correct += pred.eq(target.view_as(pred)).sum().item()
 
-            x_train.to_csv(self.model_trainer_config.X_TRAIN_DATA_PATH)
+                processed += len(data)
 
-            model_trainer_artifacts = ModelTrainerArtifacts(
-                trained_model_path = self.model_trainer_config.TRAINED_MODEL_PATH,
-                x_test_path = self.model_trainer_config.X_TEST_DATA_PATH,
-                y_test_path = self.model_trainer_config.Y_TEST_DATA_PATH)
-            logging.info("Returning the ModelTrainerArtifacts")
-            return model_trainer_artifacts
+                pbar.set_description(
+                    desc=f"Loss={loss.item()} Batch_id={batch_idx} Accuracy={100*correct/processed:0.2f}"
+                )
+
+            logging.info(f"Exited the {current_function_name} method of {self.__class__.__name__} class")
 
         except Exception as e:
             raise CustomException(e, sys) from e
+
+    def test(self) -> None:
+        current_function_name = inspect.stack()[0][3]
+        logging.info(f"Entered the {current_function_name} method of {self.__class__.__name__} class")        
+        try:
+            """
+            Description: To test the model
+
+            input: model, DEVICE, test_loader
+
+            output: average loss and accuracy
+
+            """
+
+
+            self.model.eval()
+            test_loss: float = 0.0
+            correct: int = 0
+
+            with torch.no_grad():
+                for (
+                    data,
+                    target,
+                ) in self.data_transformation_artifact.transformed_test_object:
+                    data, target = data.to(DEVICE), target.to(DEVICE)
+
+                    output = self.model(data)
+
+                    test_loss += F.nll_loss(output, target, reduction="sum").item()
+
+                    pred = output.argmax(dim=1, keepdim=True)
+
+                    correct += pred.eq(target.view_as(pred)).sum().item()
+
+                test_loss /= len(
+                    self.data_transformation_artifact.transformed_test_object.dataset
+                )
+
+                print(
+                    "Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n".format(
+                        test_loss,
+                        correct,
+                        len(
+                            self.data_transformation_artifact.transformed_test_object.dataset
+                        ),
+                        100.0
+                        * correct
+                        / len(
+                            self.data_transformation_artifact.transformed_test_object.dataset
+                        ),
+                    )
+                )
+
+            logging.info(
+                "Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)".format(
+                    test_loss,
+                    correct,
+                    len(
+                        self.data_transformation_artifact.transformed_test_object.dataset
+                    ),
+                    100.0
+                    * correct
+                    / len(
+                        self.data_transformation_artifact.transformed_test_object.dataset
+                    ),
+                )
+            )
+
+            logging.info(f"Exited the {current_function_name} method of {self.__class__.__name__} class")
+
+        except Exception as e:
+            raise CustomException(e, sys) from e
+        
+
+        
+
+    def initiate_model_trainer(self) -> ModelTrainerArtifact:
+        current_function_name = inspect.stack()[0][3]
+        logging.info(f"Entered the {current_function_name} method of {self.__class__.__name__} class")          
+        try:
+            model: Module = self.model.to(self.model_trainer_config.DEVICE)
+
+            optimizer: Optimizer = torch.optim.SGD(
+                model.parameters(), **self.model_trainer_config.OPTIMIZER_PARAMS
+            )
+
+            scheduler: _LRScheduler = StepLR(
+                optimizer=optimizer, **self.model_trainer_config.SCHEDULER_PARAMS
+            )
+
+            for epoch in range(1, self.model_trainer_config.EPOCH + 1):
+                print("Epoch : ", epoch)
+
+                self.train(optimizer=optimizer)
+
+                optimizer.step()
+
+                scheduler.step()
+
+                self.test()
+
+            os.makedirs(self.model_trainer_config.TRAINED_MODEL_DIR, exist_ok=True)
+
+            torch.save(model, self.model_trainer_config.TRAINED_MODEL_PATH)
+
+            train_transforms_obj = joblib.load(
+                self.data_transformation_artifact.train_transform_file_path
+            )
+
+            bentoml.pytorch.save_model(
+                name=self.model_trainer_config.TRAINED_BENTOML_MODEL_NAME,
+                model=model,
+                custom_objects={
+                    self.model_trainer_config.TRAIN_TRANSFORMS_KEY: train_transforms_obj
+                },
+            )
+
+            model_trainer_artifact: ModelTrainerArtifact = ModelTrainerArtifact(
+                trained_model_path=self.model_trainer_config.TRAINED_MODEL_PATH
+            )
+
+            logging.info(f"Exited the {current_function_name} method of {self.__class__.__name__} class")
+
+            return model_trainer_artifact
+
+        except Exception as e:
+            raise CustomException(e, sys) from e        

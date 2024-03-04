@@ -1,74 +1,95 @@
 from dataclasses import dataclass
 from xray.constants import *
 import os
+from torch import device
 
 @dataclass
 class DataIngestionConfig:
     def __init__(self):
-        self.BUCKET_NAME = BUCKET_NAME
-        self.ZIP_FILE_NAME = ZIP_FILE_NAME
-        self.DATA_INGESTION_ARTIFACTS_DIR = os.path.join(os.getcwd(), ARTIFACTS_DIR, DATA_INGESTION_ARTIFACTS_DIR)
-        self.DATA_ARTIFACTS_DIR: str = os.path.join(self.DATA_INGESTION_ARTIFACTS_DIR, DATA_INGESTION_IMBALANCE_DATA_DIR)
-        self.NEW_DATA_ARTIFACTS_DIR: str = os.path.join(self.DATA_INGESTION_ARTIFACTS_DIR, DATA_INGESTION_RAW_DATA_DIR)
-        self.ZIP_FILE_DIR = os.path.join(self.DATA_INGESTION_ARTIFACTS_DIR)
-        self.ZIP_FILE_PATH = os.path.join(self.DATA_INGESTION_ARTIFACTS_DIR, self.ZIP_FILE_NAME)
+        self.S3_DATA_FOLDER: str = S3_DATA_FOLDER
+        self.BUCKET_NAME: str = BUCKET_NAME
+        self.DATA_INGESTION_ARTIFACTS_DIR = os.path.join(os.getcwd(), ARTIFACTS_DIR, DATA_INGESTION_ARTIFACTS_DIR, S3_DATA_FOLDER)
+        self.TRAIN_DATA_ARTIFACTS_DIR: str = os.path.join(self.DATA_INGESTION_ARTIFACTS_DIR, TRAIN_DATA_DIR)
+        self.TEST_DATA_ARTIFACTS_DIR: str = os.path.join(self.DATA_INGESTION_ARTIFACTS_DIR, TEST_DATA_DIR)
 
-@dataclass        
-class DataValidationConfig:
-    def __init__(self):        
-        self.IMBALANCE_DATA_DIR = IMBALANCE_DATA_DIR
-        self.RAW_DATA_DIR = RAW_DATA_DIR
-        self.IMBALANCE_DATA_COLUMNS = IMBALANCE_DATA_COLUMNS
-        self.RAW_DATA_COLUMNS = RAW_DATA_COLUMNS
+# @dataclass        
+# class DataValidationConfig:
+#     def __init__(self):        
+#         self.IMBALANCE_DATA_DIR = IMBALANCE_DATA_DIR
+#         self.RAW_DATA_DIR = RAW_DATA_DIR
+#         self.IMBALANCE_DATA_COLUMNS = IMBALANCE_DATA_COLUMNS
+#         self.RAW_DATA_COLUMNS = RAW_DATA_COLUMNS
         
 @dataclass        
 class DataTransformationConfig:
-    def __init__(self):        
+    def __init__(self):    
+        self.ARTIFACTS_DIR = ARTIFACTS_DIR
         self.DATA_TRANSFORMATION_ARTIFACTS_DIR: str = os.path.join(os.getcwd(), ARTIFACTS_DIR, DATA_TRANSFORMATION_ARTIFACTS_DIR)
-        self.TRANSFORMED_FILE_PATH = os.path.join(self.DATA_TRANSFORMATION_ARTIFACTS_DIR, TRANSFORMED_FILE_NAME)        
-        self.ID = ID
-        self.AXIS = AXIS   
-        self.DROP_COLUMNS = DROP_COLUMNS
-        self.CLASS = CLASS
-        self.MAPPING_CLASS_COL_DICT = MAPPING_CLASS_COL_DICT   
-        self.LABEL = LABEL    
-        self.TWEET = TWEET    
-        self.INPLACE = INPLACE              
+        self.TRAIN_TRANSFORMS_FILE: str = os.path.join(
+            self.DATA_TRANSFORMATION_ARTIFACTS_DIR, TRAIN_TRANSFORMS_FILE
+        )
+
+        self.TEST_TRANSFORMS_FILE: str = os.path.join(
+            self.DATA_TRANSFORMATION_ARTIFACTS_DIR, TEST_TRANSFORMS_FILE
+        )   
+
+        self.COLOR_JITTER_TRANSFORMS: dict = {
+            "brightness": BRIGHTNESS,
+            "contrast": CONTRAST,
+            "saturation": SATURATION,
+            "hue": HUE,
+        }
+        
+        self.RESIZE: int = RESIZE
+        self.CENTERCROP: int = CENTERCROP
+        self.RANDOMROTATION: int = RANDOMROTATION
+        self.NORMALIZE_TRANSFORMS: dict = {
+            "mean": NORMALIZE_LIST_1,
+            "std": NORMALIZE_LIST_2,
+        }
+        self.DATA_LOADER_PARAMS: dict = {
+            "batch_size": BATCH_SIZE,
+            "shuffle": SHUFFLE,
+            "pin_memory": PIN_MEMORY,
+        }    
         
 @dataclass        
 class ModelTrainerConfig:
-    def __init__(self):        
+    def __init__(self):    
+        self.ARTIFACTS_DIR = ARTIFACTS_DIR    
         self.TRAINED_MODEL_DIR: str = os.path.join(os.getcwd(), ARTIFACTS_DIR, MODEL_TRAINER_ARTIFACTS_DIR)
+        self.TRAINED_BENTOML_MODEL_NAME = BENTOML_MODEL_NAME
         self.TRAINED_MODEL_PATH = os.path.join(self.TRAINED_MODEL_DIR, TRAINED_MODEL_NAME)  
-        self.X_TEST_DATA_PATH = os.path.join(self.TRAINED_MODEL_DIR, X_TEST_FILE_NAME)
-        self.Y_TEST_DATA_PATH = os.path.join(self.TRAINED_MODEL_DIR, Y_TEST_FILE_NAME)      
-        self.X_TRAIN_DATA_PATH = os.path.join(self.TRAINED_MODEL_DIR, X_TRAIN_FILE_NAME)  
+
+        self.TRAIN_TRANSFORMS_KEY: str = TRAIN_TRANSFORMS_KEY
+ 
         self.RANDOM_STATE = RANDOM_STATE   
         self.EPOCH = EPOCH
-        self.VALIDATION_SPLIT = VALIDATION_SPLIT
-        self.MAX_WORDS = MAX_WORDS   
-        self.MAX_LEN = MAX_LEN    
-        self.METRICS = METRICS    
-        self.ACTIVATION = ACTIVATION     
-        self.BATCH_SIZE = BATCH_SIZE   
-        self.LOSS = LOSS
-        self.LABEL = LABEL
-        self.TWEET = TWEET       
+        self.OPTIMIZER_PARAMS: dict = {"lr": LEARNING_RATE, "momentum": MOMENTUM_BETA}
+
+        self.SCHEDULER_PARAMS: dict = {"step_size": STEP_SIZE, "gamma": GAMMA}
+
+        self.DEVICE: device = DEVICE 
         
 @dataclass
 class ModelEvaluationConfig: 
     def __init__(self):
-        self.MODEL_EVALUATION_MODEL_DIR: str = os.path.join(os.getcwd(),ARTIFACTS_DIR, MODEL_EVALUATION_ARTIFACTS_DIR)
-        self.BEST_MODEL_DIR_PATH: str = os.path.join(self.MODEL_EVALUATION_MODEL_DIR,BEST_MODEL_DIR)
-        self.BUCKET_NAME = BUCKET_NAME 
-        self.MODEL_NAME = MODEL_NAME 
-
-
+        self.ARTIFACTS_DIR = ARTIFACTS_DIR
+        self.DEVICE: device = DEVICE
+        self.TEST_LOSS: int = 0
+        self.TEST_ACCURACY: int = 0
+        self.TOTAL: int = 0
+        self.TOTAL_BATCH: int = 0
+        self.OPTIMIZER_PARAMS: dict = {"lr": LEARNING_RATE, "momentum": MOMENTUM_BETA}
 
 @dataclass
 class ModelPusherConfig:
 
     def __init__(self):
-        self.TRAINED_MODEL_PATH = os.path.join(os.getcwd(),ARTIFACTS_DIR, MODEL_TRAINER_ARTIFACTS_DIR)
-        self.BUCKET_NAME = BUCKET_NAME
-        self.MODEL_NAME = MODEL_NAME      
+        self.BENTOML_MODEL_NAME: str = BENTOML_MODEL_NAME
+        self.BENTOML_SERVICE_NAME: str = BENTOML_SERVICE_NAME
+        self.TRAIN_TRANSFORMS_KEY: str = TRAIN_TRANSFORMS_KEY
+        self.BENTOML_ECR_URI: str = BENTOML_ECR_URI  
+        self.BENTOML_ECR_LINK: str = BENTOML_ECR_LINK
+        self.BENTOML_ECR_REGION: str = BENTOML_ECR_REGION
+        self.BENTOML_ECR_USERNAME: str = BENTOML_ECR_USERNAME

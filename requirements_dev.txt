@@ -1,9 +1,10 @@
-pip-chill
-bentoml
-torchvision
-joblib
-tdqm
-wincertstore
+bentoml==1.0.25
+from-root
+joblib==1.2.0
+pip-chill==1.0.1
+torchvision==0.14.1
+tqdm==4.64.1
+wincertstore==0.2
 dvc
 mlflow
 ipykernel
